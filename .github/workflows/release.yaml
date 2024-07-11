@@ -62,7 +62,7 @@ jobs:
       - name: Release
         if: steps.build.outputs.skip != 'true'
         id: release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.0.6 
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
