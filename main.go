@@ -185,7 +185,22 @@ func generate(release *github.RepositoryRelease, output string) error {
 }
 
 func setActionOutput(name string, content string) {
-	os.Stdout.WriteString("::set-output name=" + name + "::" + content + "\n")
+  appendToFile(os.Getenv("GITHUB_OUTPUT"), name + "=" + content)
+}
+
+func appendToFile(filename string, content string) error {
+  file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  if err != nil {
+    return err
+  }
+  defer file.Close()
+
+  _, err = file.WriteString(content + "\n")
+  if err != nil {
+    return err
+  }
+
+  return nil
 }
 
 func release(source string, destination string, output string) error {
