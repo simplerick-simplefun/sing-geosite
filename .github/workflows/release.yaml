@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Get latest go version
@@ -17,7 +17,7 @@ jobs:
         run: |
           echo ::set-output name=go_version::1.19.9
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.version.outputs.go_version }}
       - name: Build geosite
@@ -48,7 +48,7 @@ jobs:
           git branch -D release
           git branch -m release
       - name: GitHub Push
-        uses: ad-m/github-push-action@v0.6.0
+        uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: release
@@ -58,35 +58,19 @@ jobs:
         run: |
           curl -L https://purge.jsdelivr.net/gh/simplerick-simplefun/sing-geosite@release/geosite.db > /dev/null 2>&1
           curl -L https://purge.jsdelivr.net/gh/simplerick-simplefun/sing-geosite@release/geosite.db.sha256sum > /dev/null 2>&1
-          
-      - name: Create a release
+
+      - name: Release
         if: steps.build.outputs.skip != 'true'
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.build.outputs.tag }}
-          release_name: ${{ steps.build.outputs.tag }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           prerelease: false
-      - name: Release geosite.db
-        if: steps.build.outputs.skip != 'true'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./geosite.db
-          asset_name: geosite.db
-          asset_content_type: application/octet-stream
-      - name: Release geosite.db sha256sum
-        if: steps.build.outputs.skip != 'true'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./geosite.db.sha256sum
-          asset_name: geosite.db.sha256sum
-          asset_content_type: text/plain
+          append_body: false
+          fail_on_unmatched_files: true
+          name: "${{ steps.build.outputs.tag }}"
+          tag_name: "${{ steps.build.outputs.tag }}"
+          files: |
+            geosite.db
+            geosite.db.sha256sum
