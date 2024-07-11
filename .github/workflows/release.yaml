@@ -58,8 +58,7 @@ jobs:
       - name: Purge CDN Cache
         if: steps.build.outputs.skip != 'true'
         run: |
-          curl -L https://purge.jsdelivr.net/gh/simplerick-simplefun/sing-geosite@release/geosite.db > /dev/null 2>&1
-          curl -L https://purge.jsdelivr.net/gh/simplerick-simplefun/sing-geosite@release/geosite.db.sha256sum > /dev/null 2>&1
+          curl -L https://purge.jsdelivr.net/gh/simplerick-simplefun/sing-geosite@release/ > /dev/null 2>&1
 
       - name: Release
         if: steps.build.outputs.skip != 'true'
